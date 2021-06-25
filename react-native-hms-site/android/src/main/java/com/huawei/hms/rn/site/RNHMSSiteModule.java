@@ -1,11 +1,11 @@
 /*
-    Copyright 2020. Huawei Technologies Co., Ltd. All rights reserved.
+    Copyright 2020-2021. Huawei Technologies Co., Ltd. All rights reserved.
 
-    Licensed under the Apache License, Version 2.0 (the "License");
+    Licensed under the Apache License, Version 2.0 (the "License")
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+        https://www.apache.org/licenses/LICENSE-2.0
 
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,9 +36,6 @@ public class RNHMSSiteModule extends ReactContextBaseJavaModule {
     @Override
     public void initialize() {
         super.initialize();
-        siteWrapper = new RNHMSSiteWrapper(getCurrentActivity());
-        widgetWrapper = new RNHMSWidgetWrapper(getCurrentActivity());
-        reactContext.addActivityEventListener(widgetWrapper);
     }
 
     @Override
@@ -48,9 +45,12 @@ public class RNHMSSiteModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void initializeService(ReadableMap params, Promise promise) {
+        siteWrapper = new RNHMSSiteWrapper(getCurrentActivity());
+        widgetWrapper = new RNHMSWidgetWrapper(getCurrentActivity());
+        reactContext.addActivityEventListener(widgetWrapper);
+
         siteWrapper.initializeService(params, reactContext.getCurrentActivity(), promise);
     }
-
 
     @ReactMethod
     public void textSearch(ReadableMap params, Promise promise) {
@@ -73,14 +73,23 @@ public class RNHMSSiteModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void queryAutocomplete(ReadableMap params, Promise promise) {
+        siteWrapper.queryAutocomplete(params, promise);
+    }
+
+    @ReactMethod
     public void createWidget(ReadableMap params, Promise promise) {
-        widgetWrapper.createSearchWidget(params, promise);
+        if (widgetWrapper != null) {
+            widgetWrapper.createSearchWidget(params, promise);
+        } else {
+            promise.reject("WIDGET_NOT_INITIALIZED", "The widget is not initialized.");
+        }
     }
 
     @ReactMethod
     public void enableLogger(Promise promise) {
         if (getCurrentActivity() == null) {
-            promise.reject("The activity is not initialized.");
+            promise.reject("NULL_ACTIVITY_ERROR", "The activity is not initialized.");
             return;
         }
         HMSLogger.getInstance(getCurrentActivity()).enableLogger();
@@ -90,7 +99,7 @@ public class RNHMSSiteModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void disableLogger(Promise promise) {
         if (getCurrentActivity() == null) {
-            promise.reject("The activity is not initialized.");
+            promise.reject("NULL_ACTIVITY_ERROR", "The activity is not initialized.");
             return;
         }
         HMSLogger.getInstance(getCurrentActivity()).disableLogger();

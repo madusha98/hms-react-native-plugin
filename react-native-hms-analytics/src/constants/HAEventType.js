@@ -1,5 +1,5 @@
 /*
-    Copyright 2020. Huawei Technologies Co., Ltd. All rights reserved.
+    Copyright 2020-2021. Huawei Technologies Co., Ltd. All rights reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License")
     you may not use this file except in compliance with the License.
@@ -58,6 +58,13 @@ const HAEventType = {
   CONTACTCUSTOMSERVICE: "$ContactCustomService",
   RATE: "$Rate",
   INVITE: "$Invite",
+  NOVICEGUIDESTART : "$NoviceGuideStart",
+  NOVICEGUIDEEND : "$NoviceGuideEnd",
+  STARTGAME : "$StartGame",
+  ENDGAME : "$EndGame",
+  WINPROPS : "$WinProps",
+  CONSUMEPROPS : "$ConsumeProps"
 };
 
+Object.freeze(HAEventType)
 export default HAEventType;

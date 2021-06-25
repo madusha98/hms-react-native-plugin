@@ -1,5 +1,5 @@
 /*
-    Copyright 2020. Huawei Technologies Co., Ltd. All rights reserved.
+    Copyright 2020-2021. Huawei Technologies Co., Ltd. All rights reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License")
     you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
@@ -41,6 +40,8 @@ import com.huawei.hms.maps.model.animation.Animation;
 import com.huawei.hms.maps.model.animation.AnimationSet;
 import com.huawei.hms.rn.map.logger.HMSLogger;
 import com.huawei.hms.rn.map.utils.ReactUtils;
+import com.huawei.hms.rn.map.utils.UriIconController;
+import com.huawei.hms.rn.map.utils.UriIconView;
 
 import java.util.Map;
 
@@ -48,7 +49,7 @@ import static com.huawei.hms.rn.map.HMSMapView.MapLayerView;
 import static com.huawei.hms.rn.map.HMSMapView.MapLayerViewManager;
 import static com.huawei.hms.rn.map.HMSInfoWindowView.SizeLayoutShadowNode;
 
-public class HMSMarkerView extends MapLayerView {
+public class HMSMarkerView extends MapLayerView implements UriIconView {
     private static final String TAG = HMSMarkerView.class.getSimpleName();
     private static final String REACT_CLASS = HMSMarkerView.class.getSimpleName();
     private MarkerOptions mMarkerOptions = new MarkerOptions();
@@ -57,18 +58,19 @@ public class HMSMarkerView extends MapLayerView {
     private LinearLayout almostWrappedInfoWindowView;
     private LinearLayout wrappedInfoWindowView;
     private AnimationSet animationSet;
-
     public boolean defaultActionOnClick = true;
+    private final UriIconController uriIconController;
 
     HMSLogger logger;
 
     public HMSMarkerView(Context context) {
         super(context);
         logger = HMSLogger.getInstance(context);
+        uriIconController = new UriIconController(context, this);
     }
 
     public static class Manager extends MapLayerViewManager<HMSMarkerView> {
-        private HMSLogger logger;
+        private final HMSLogger logger;
 
         public Manager(Context context) {
             super();
@@ -108,7 +110,7 @@ public class HMSMarkerView extends MapLayerView {
             ANIMATION_START("onAnimationStart"),
             ANIMATION_END("onAnimationEnd");
 
-            private String markerEventName;
+            private final String markerEventName;
 
             Event(String markerEventName) {
                 this.markerEventName = markerEventName;
@@ -132,7 +134,7 @@ public class HMSMarkerView extends MapLayerView {
             SET_ANIMATION("setAnimation"),
             CLEAN_ANIMATION("cleanAnimation");
 
-            private String markerCommandName;
+            private final String markerCommandName;
 
             Command(String markerCommandName) {
                 this.markerCommandName = markerCommandName;
@@ -186,7 +188,7 @@ public class HMSMarkerView extends MapLayerView {
         }
 
         @ReactProp(name = "defaultActionOnClick", defaultBoolean = true)
-        public void setDefaultActionOnClick(HMSMarkerView view, boolean isDefault){
+        public void setDefaultActionOnClick(HMSMarkerView view, boolean isDefault) {
             view.setDefaultActionOnClick(isDefault);
         }
 
@@ -226,8 +228,8 @@ public class HMSMarkerView extends MapLayerView {
         }
 
         @ReactProp(name = "rotation")
-        public void setRotation(HMSMarkerView view, float rotation) {
-            view.setRotation(rotation);
+        public void setMarkerRotation(HMSMarkerView view, float rotation) {
+            view.setMarkerRotation(rotation);
         }
 
         @ReactProp(name = "snippet")
@@ -270,19 +272,19 @@ public class HMSMarkerView extends MapLayerView {
     }
 
     private void setAnimation(ReadableArray args) {
-        if(args == null) {
+        if (args == null) {
             return;
         }
         animationSet = new AnimationSet(false);
         ReadableMap animationMap = args.getMap(0);
         ReadableMap defaultsMap = args.getMap(1);
-        if(animationMap == null) return;
+        if (animationMap == null) return;
 
         ReadableMapKeySetIterator it = animationMap.keySetIterator();
-        while(it.hasNextKey()){
+        while (it.hasNextKey()) {
             String key = it.nextKey();
             Animation animation = ReactUtils.getAnimationFromCommandArgs(animationMap.getMap(key), defaultsMap, key);
-            if(animation != null){
+            if (animation != null) {
                 animation.setAnimationListener(new Animation.AnimationListener() {
                     @Override
                     public void onAnimationStart() {
@@ -408,11 +410,12 @@ public class HMSMarkerView extends MapLayerView {
     }
 
     private void setIcon(ReadableMap icon) {
-        BitmapDescriptor bitmapDescriptor = ReactUtils.getBitmapDescriptorFromReadableMap(icon);
-        mMarkerOptions.icon(bitmapDescriptor);
-        if (mMarker != null) {
-            mMarker.setIcon(bitmapDescriptor);
+        if(icon.hasKey("uri")){
+            uriIconController.setUriIcon(icon);
+            return;
         }
+        BitmapDescriptor bitmapDescriptor = ReactUtils.getBitmapDescriptorFromReadableMap(icon);
+        setUriIcon(bitmapDescriptor, null);
     }
 
     private void setInfoWindowAnchor(ReadableArray infoWindowAnchor) {
@@ -438,8 +441,7 @@ public class HMSMarkerView extends MapLayerView {
         }
     }
 
-    @Override
-    public void setRotation(float rotation) {
+    public void setMarkerRotation(float rotation) {
         mMarkerOptions.rotation(rotation);
         if (mMarker != null) {
             mMarker.setRotation(rotation);
@@ -482,6 +484,13 @@ public class HMSMarkerView extends MapLayerView {
         defaultActionOnClick = isDefault;
     }
 
+    @Override
+    public void setUriIcon(BitmapDescriptor bitmapDescriptor, ReadableMap options){
+        mMarkerOptions.icon(bitmapDescriptor);
+        if (mMarker != null) {
+            mMarker.setIcon(bitmapDescriptor);
+        }
+    }
 
     @Override
     public Marker addTo(HuaweiMap huaweiMap) {
@@ -491,11 +500,11 @@ public class HMSMarkerView extends MapLayerView {
 
     @Override
     public void removeFrom(HuaweiMap huaweiMap) {
-        if(mMarker == null) return;
+        if (mMarker == null) return;
         try {
             mMarker.getPosition();
             mMarker.remove();
-        } catch(NullPointerException e) {
+        } catch (NullPointerException e) {
             mMarker = null;
             mMarkerOptions = null;
         }
@@ -504,12 +513,12 @@ public class HMSMarkerView extends MapLayerView {
 
     @Override
     public WritableMap getInfo() {
-        if (mMarker == null){
+        if (mMarker == null) {
             return null;
         }
         try {
             return ReactUtils.getWritableMapFromMarker(mMarker);
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             return (WritableMap) null;
         }
 
@@ -517,7 +526,7 @@ public class HMSMarkerView extends MapLayerView {
 
     @Override
     public WritableMap getOptionsInfo() {
-        if (mMarkerOptions == null){
+        if (mMarkerOptions == null) {
             return null;
         }
         return ReactUtils.getWritableMapFromMarkerOptions(mMarkerOptions);

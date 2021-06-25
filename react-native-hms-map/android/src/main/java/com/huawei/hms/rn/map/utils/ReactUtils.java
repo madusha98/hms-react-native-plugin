@@ -1,5 +1,5 @@
 /*
-    Copyright 2020. Huawei Technologies Co., Ltd. All rights reserved.
+    Copyright 2020-2021. Huawei Technologies Co., Ltd. All rights reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License")
     you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 package com.huawei.hms.rn.map.utils;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Range;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
@@ -87,7 +86,6 @@ import com.huawei.hms.maps.model.animation.TranslateAnimation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -95,7 +93,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
 
 public class ReactUtils {
     private static final String TAG = ReactUtils.class.getSimpleName();
@@ -243,6 +240,10 @@ public class ReactUtils {
         wm.putDouble("tilt", obj.tilt);
         wm.putDouble("bearing", obj.bearing);
         return wm;
+    }
+
+    public static int getColorFromRgbaArray(ReadableArray array) {
+        return Color.argb(array.getInt(0), array.getInt(1), array.getInt(2), array.getInt(3));
     }
 
     public static LatLngBounds getLatLngBoundsFromReadableArray(ReadableArray rm) {
@@ -586,6 +587,7 @@ public class ReactUtils {
         return BitmapDescriptorFactory.defaultMarker();
     }
 
+
     public static WritableMap getWritableMapPatternItem(PatternItem obj) {
         WritableMap wm = new WritableNativeMap();
         if (obj == null) {
@@ -639,13 +641,17 @@ public class ReactUtils {
                 return new RoundCap();
             case Cap.TYPE_CUSTOM_CAP:
                 BitmapDescriptor bitmapDescriptor = getBitmapDescriptorFromReadableMap(rm);
-                if (hasValidKey(rm, "refWidth", ReadableType.Number)) {
-                    return new CustomCap(bitmapDescriptor, (float) rm.getDouble("refWidth"));
-                }
-                return new CustomCap(bitmapDescriptor);
+                return getCustomCapFromBitmapDescriptor(bitmapDescriptor, rm.hasKey("refWidth") ? (float) rm.getDouble("refWidth") : null);
             default:
                 return defaultCap;
         }
+    }
+
+    public static CustomCap getCustomCapFromBitmapDescriptor(BitmapDescriptor bitmapDescriptor, Float refWidth){
+        if (refWidth != null) {
+            return new CustomCap(bitmapDescriptor, refWidth);
+        }
+        return new CustomCap(bitmapDescriptor);
     }
 
     public static List<PatternItem> getPatternItemListFromReadableArray(ReadableArray ra) {
@@ -749,7 +755,7 @@ public class ReactUtils {
     }
 
     public static Animation getAnimationFromCommandArgs(ReadableMap map, ReadableMap defaults, String key) {
-        Animation animation = null;
+        Animation animation;
         switch (key) {
             case "alpha": //ALPHA
                 float fromAlpha = (float) map.getDouble("fromAlpha");
@@ -773,9 +779,10 @@ public class ReactUtils {
                 animation = new TranslateAnimation(target);
                 break;
             default:
+                animation = null;
                 break;
         }
-        if (animation != null) {
+        if (animation != null && map != null) {
             if (map.hasKey("duration"))
                 animation.setDuration(map.getInt("duration"));
             else if (defaults != null && defaults.hasKey("duration"))

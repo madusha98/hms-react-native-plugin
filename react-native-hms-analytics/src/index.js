@@ -1,5 +1,5 @@
 /*
-    Copyright 2020. Huawei Technologies Co., Ltd. All rights reserved.
+    Copyright 2020-2021. Huawei Technologies Co., Ltd. All rights reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License")
     you may not use this file except in compliance with the License.
@@ -17,10 +17,133 @@
 import {NativeModules} from 'react-native';
 import HAEventType from './constants/HAEventType';
 import HAParamType from './constants/HAParamType';
+import HAUserProfileType from "./constants/HAUserProfileType";
+import ReportPolicyType from "./constants/ReportPolicyType";
+import Constants from "./constants/Constants";
+import {Platform} from "react-native";
 
-const {HmsAnalytics} = NativeModules;
+const {HMSAnalyticsModule} = NativeModules;
+const isIOS = Platform.OS === 'ios';
 
-HmsAnalytics.HAEventType = HAEventType;
-HmsAnalytics.HAParamType = HAParamType;
+class HMSAnalytics{
 
-export default HmsAnalytics;
+    static setMinActivitySessions(minActivitySessionValue){
+        if(isIOS){
+            console.log("This function is not available in iOS platforms.");
+            return;
+        }
+        return HMSAnalyticsModule.setMinActivitySessions(minActivitySessionValue);
+    }
+
+    static setPushToken(token) {
+        if (isIOS) {
+            console.log("This function is not available in iOS platforms.");
+            return;
+        }
+        return HMSAnalyticsModule.setPushToken(token);
+    }
+
+    static enableLogWithLevel(level){
+        if(isIOS){
+            console.log("This function is not available in iOS platforms.");
+            return;
+        }
+        return HMSAnalyticsModule.enableLogWithLevel(level);
+    }
+
+    static enableLog(){
+        if(isIOS){
+            console.log("This function is not available in iOS platforms.");
+            return;
+        }
+        return HMSAnalyticsModule.enableLog();
+    }
+
+    static pageEnd(pageName){
+        if(isIOS){
+            console.log("This function is not available in iOS platforms.");
+            return;
+        }
+        return HMSAnalyticsModule.pageEnd(pageName);
+    }
+
+    static pageStart(pageName, pageClassOverride){
+        if(isIOS){
+            console.log("This function is not available in iOS platforms.");
+            return;
+        }
+        return HMSAnalyticsModule.pageStart(pageName, pageClassOverride);
+    }
+
+    static getReportPolicyThreshold(reportPolicyType){
+        if(isIOS){
+            console.log("This function is not available in iOS platforms.");
+            return;
+        }
+        return HMSAnalyticsModule.getReportPolicyThreshold(reportPolicyType);
+    }
+
+    static setAnalyticsEnabled(isEnabled){
+        return HMSAnalyticsModule.setAnalyticsEnabled(isEnabled);
+    }
+
+    static setRestrictionEnabled(isEnabled){
+        return HMSAnalyticsModule.setRestrictionEnabled(isEnabled);
+    }
+
+    static setUserId(userId){
+        return HMSAnalyticsModule.setUserId(userId);
+    }
+
+    static setUserProfile(name, value){
+        return HMSAnalyticsModule.setUserProfile(name, value);
+    }
+
+    static deleteUserProfile(name){
+        return HMSAnalyticsModule.deleteUserProfile(name);
+    }
+
+    static setSessionDuration(milliseconds) {
+        return HMSAnalyticsModule.setSessionDuration(milliseconds);
+    }
+
+    static clearCachedData(){
+        return HMSAnalyticsModule.clearCachedData();
+    }
+
+    static getAAID(){
+        return HMSAnalyticsModule.getAAID();
+    }
+
+    static getUserProfiles(isEnabled){
+        return HMSAnalyticsModule.getUserProfiles(isEnabled);
+    }
+
+    static onEvent(event, rMap){
+        return HMSAnalyticsModule.onEvent(event, rMap);
+    }
+
+    static isRestrictionEnabled(){
+        return HMSAnalyticsModule.isRestrictionEnabled();
+    }
+
+    static setReportPolicies(policies) {
+        return HMSAnalyticsModule.setReportPolicies(policies);
+    }
+
+    static enableLogger(){
+        return HMSAnalyticsModule.enableLogger();
+    }
+
+    static disableLogger(){
+        return HMSAnalyticsModule.disableLogger();
+    }
+}
+
+HMSAnalytics.HAEventType = HAEventType;
+HMSAnalytics.HAParamType = HAParamType;
+HMSAnalytics.HAUserProfileType = HAUserProfileType;
+HMSAnalytics.ReportPolicyType = ReportPolicyType;
+HMSAnalytics.Constants = Constants;
+
+export default HMSAnalytics;

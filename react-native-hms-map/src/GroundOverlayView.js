@@ -1,5 +1,5 @@
 /*
-    Copyright 2020. Huawei Technologies Co., Ltd. All rights reserved.
+    Copyright 2020-2021. Huawei Technologies Co., Ltd. All rights reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License")
     you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ class HMSGroundOverlayView extends Component {
 HMSGroundOverlayView.propTypes = {
   ...ViewPropTypes,
   image: exact({
+    uri: string,
     hue: number,
     asset: string,
     file: string,

@@ -1,5 +1,5 @@
 /*
-    Copyright 2020. Huawei Technologies Co., Ltd. All rights reserved.
+    Copyright 2020-2021. Huawei Technologies Co., Ltd. All rights reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License")
     you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class HMSAdsSplashAdModule extends ReactContextBaseJavaModule {
     private int mSloganResId = R.drawable.default_slogan;
     private int mWideSloganResId = R.drawable.default_slogan;
     private int mLogoResId = R.drawable.ic_launcher;
-    private int mMediaNameResId = R.string.media_name;
+    private int mMediaNameResId = 2131493009;
     private int mAudioFocusType = AudioFocusType.NOT_GAIN_AUDIO_FOCUS_WHEN_MUTE;
     private String mAdId = "testd7c5cewoj6";
     private String mLogoText = "Huawei Developer";
